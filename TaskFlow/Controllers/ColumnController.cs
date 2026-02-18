@@ -30,20 +30,20 @@ namespace TaskFlow.Controllers
         {
             var userId = GetUserId();
 
-            var member = await _context.BoardMembers
-                .FirstOrDefaultAsync(bm => bm.BoardId == dto.BoardId && bm.UserId == userId);
+            var role = await GetUserRole(dto.BoardId);
 
-            if (member == null)
+            if (role == null || role == BoardRole.Member)
                 return Forbid();
 
-            if (member.Role == BoardRole.Member)
-                return Forbid();
+            var lastPosition = await _context.Columns
+                .Where(c => c.BoardId == dto.BoardId)
+                .MaxAsync(c => (int?)c.Position) ?? -1;
 
             var column = new TaskColumn
             {
                 BoardId = dto.BoardId,
                 Name = dto.Name,
-                Position = dto.Position
+                Position = lastPosition + 1
             };
 
             _context.Columns.Add(column);
@@ -52,24 +52,39 @@ namespace TaskFlow.Controllers
             return Ok(column);
         }
 
+
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBoard(int id)
+        public async Task<IActionResult> DeleteColumn(int id)
         {
-            var role = await GetUserRole(id);
+            var userId = GetUserId();
 
-            if (role != BoardRole.Owner)
-                return Forbid();
+            var column = await _context.Columns
+                .FirstOrDefaultAsync(c => c.Id == id);
 
-            var board = await _context.Boards.FindAsync(id);
-
-            if (board == null)
+            if (column == null)
                 return NotFound();
 
-            _context.Boards.Remove(board);
+            var role = await GetUserRole(column.BoardId);
+
+            if (role == null || role == BoardRole.Member)
+                return Forbid();
+
+            var position = column.Position;
+
+            _context.Columns.Remove(column);
+
+            var columnsToShift = await _context.Columns
+                .Where(c => c.BoardId == column.BoardId && c.Position > position)
+                .ToListAsync();
+
+            foreach (var col in columnsToShift)
+                col.Position--;
+
             await _context.SaveChangesAsync();
 
             return Ok();
         }
+
         private async Task<BoardRole?> GetUserRole(int boardId)
         {
             var userId = GetUserId();
@@ -79,5 +94,81 @@ namespace TaskFlow.Controllers
 
             return member?.Role;
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateColumn(int id, UpdateColumnDto dto)
+        {
+            var userId = GetUserId();
+
+            var column = await _context.Columns
+                .Include(c => c.Board)
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (column == null)
+                return NotFound();
+
+            var role = await GetUserRole(column.BoardId);
+
+            if (role == null || role == BoardRole.Member)
+                return Forbid();
+
+            column.Name = dto.Name;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(column);
+        }
+
+        [HttpPut("{id}/move")]
+        public async Task<IActionResult> MoveColumn(int id, ReorderColumnDto dto)
+        {
+            var userId = GetUserId();
+
+            var column = await _context.Columns
+                .FirstOrDefaultAsync(c => c.Id == id);
+
+            if (column == null)
+                return NotFound();
+
+            var role = await GetUserRole(column.BoardId);
+
+            if (role == null || role == BoardRole.Member)
+                return Forbid();
+
+            var oldPosition = column.Position;
+            var newPosition = dto.NewPosition;
+
+            if (oldPosition == newPosition)
+                return Ok(column);
+
+            var columns = await _context.Columns
+                .Where(c => c.BoardId == column.BoardId)
+                .ToListAsync();
+
+            if (newPosition > oldPosition)
+            {
+                foreach (var col in columns
+                    .Where(c => c.Position > oldPosition && c.Position <= newPosition))
+                {
+                    col.Position--;
+                }
+            }
+            else
+            {
+                foreach (var col in columns
+                    .Where(c => c.Position >= newPosition && c.Position < oldPosition))
+                {
+                    col.Position++;
+                }
+            }
+
+            column.Position = newPosition;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(column);
+        }
+
+
     }
 }

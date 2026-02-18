@@ -37,18 +37,21 @@ namespace TaskFlow.Controllers
             if (column == null)
                 return NotFound();
 
-            var isMember = await _context.BoardMembers
-                .AnyAsync(bm => bm.BoardId == column.BoardId && bm.UserId == userId);
+            var role = await GetUserRole(column.BoardId);
 
-            if (!isMember)
+            if (role == null)
                 return Forbid();
+
+            var lastPosition = await _context.Tasks
+                .Where(t => t.ColumnId == dto.ColumnId)
+                .MaxAsync(t => (int?)t.Position) ?? -1;
 
             var task = new TaskItem
             {
                 ColumnId = dto.ColumnId,
                 Title = dto.Title,
                 Description = dto.Description,
-                Position = dto.Position
+                Position = lastPosition + 1
             };
 
             _context.Tasks.Add(task);
@@ -56,6 +59,7 @@ namespace TaskFlow.Controllers
 
             return Ok(task);
         }
+
 
         [HttpPut("{id}/move")]
         public async Task<IActionResult> MoveTask(int id, MoveTaskDto dto)
@@ -131,6 +135,31 @@ namespace TaskFlow.Controllers
                 .FirstOrDefaultAsync(bm => bm.BoardId == boardId && bm.UserId == userId);
 
             return member?.Role;
+        }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateTask(int id, UpdateTaskDto dto)
+        {
+            var userId = GetUserId();
+
+            var task = await _context.Tasks
+                .Include(t => t.Column)
+                .FirstOrDefaultAsync(t => t.Id == id);
+
+            if (task == null)
+                return NotFound();
+
+            var role = await GetUserRole(task.Column.BoardId);
+
+            if (role == null)
+                return Forbid();
+
+            task.Title = dto.Title;
+            task.Description = dto.Description;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(task);
         }
 
     }

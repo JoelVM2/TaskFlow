@@ -123,6 +123,61 @@ namespace TaskFlow.Controllers
             });
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CreateBoard(CreateBoardDto dto)
+        {
+            var userId = GetUserId();
+
+            var joinCode = GenerateJoinCode();
+
+            var board = new Board
+            {
+                Name = dto.Name,
+                JoinCode = joinCode,
+                OwnerId = userId
+            };
+
+            _context.Boards.Add(board);
+            await _context.SaveChangesAsync();
+
+            var boardMember = new BoardMember
+            {
+                BoardId = board.Id,
+                UserId = userId,
+                Role = BoardRole.Owner
+            };
+
+            _context.BoardMembers.Add(boardMember);
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                board.Id,
+                board.Name,
+                board.JoinCode
+            });
+        }
+
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteBoard(int id)
+        {
+            var role = await GetUserRole(id);
+
+            if (role != BoardRole.Owner)
+                return Forbid();
+
+            var board = await _context.Boards.FindAsync(id);
+
+            if (board == null)
+                return NotFound();
+
+            _context.Boards.Remove(board);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
         private async Task<BoardRole?> GetUserRole(int boardId)
         {
             var userId = GetUserId();
@@ -133,6 +188,12 @@ namespace TaskFlow.Controllers
             return member?.Role;
         }
 
-
+        private string GenerateJoinCode()
+        {
+            const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            var random = new Random();
+            return new string(Enumerable.Repeat(chars, 6)
+                .Select(s => s[random.Next(s.Length)]).ToArray());
+        }
     }
 }

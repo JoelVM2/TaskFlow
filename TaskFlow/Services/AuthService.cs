@@ -59,7 +59,7 @@ namespace TaskFlow.Services
                 {
                     UserId = user.Id,
                     BoardId = board.Id,
-                    Role = "Owner"
+                    Role = BoardRole.Owner,
                 };
 
                 _context.BoardMembers.Add(boardMember);
@@ -67,9 +67,9 @@ namespace TaskFlow.Services
                 // Crear columnas por defecto
                 var columns = new List<TaskColumn>
                 {
-                    new TaskColumn { Name = "To Do", Position = 1, BoardId = board.Id },
-                    new TaskColumn { Name = "In Progress", Position = 2, BoardId = board.Id },
-                    new TaskColumn { Name = "Done", Position = 3, BoardId = board.Id }
+                    new TaskColumn { Name = "To Do", Position = 0, BoardId = board.Id },
+                    new TaskColumn { Name = "In Progress", Position = 1, BoardId = board.Id },
+                    new TaskColumn { Name = "Done", Position = 2, BoardId = board.Id }
                 };
 
                 _context.Columns.AddRange(columns);
