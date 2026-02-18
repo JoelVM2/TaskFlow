@@ -12,7 +12,7 @@ using TaskFlow.Data;
 namespace TaskFlow.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260217180003_InitialCreate")]
+    [Migration("20260218181418_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -24,6 +24,27 @@ namespace TaskFlow.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
+
+            modelBuilder.Entity("BoardMember", b =>
+                {
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("JoinedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("Role")
+                        .HasColumnType("int");
+
+                    b.HasKey("UserId", "BoardId");
+
+                    b.HasIndex("BoardId");
+
+                    b.ToTable("BoardMembers");
+                });
 
             modelBuilder.Entity("TaskFlow.Models.Board", b =>
                 {
@@ -57,28 +78,6 @@ namespace TaskFlow.Migrations
                     b.HasIndex("OwnerId");
 
                     b.ToTable("Boards");
-                });
-
-            modelBuilder.Entity("TaskFlow.Models.BoardMember", b =>
-                {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("BoardId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("JoinedAt")
-                        .HasColumnType("datetime(6)");
-
-                    b.Property<string>("Role")
-                        .IsRequired()
-                        .HasColumnType("longtext");
-
-                    b.HasKey("UserId", "BoardId");
-
-                    b.HasIndex("BoardId");
-
-                    b.ToTable("BoardMembers");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.TaskColumn", b =>
@@ -184,18 +183,7 @@ namespace TaskFlow.Migrations
                     b.ToTable("Users");
                 });
 
-            modelBuilder.Entity("TaskFlow.Models.Board", b =>
-                {
-                    b.HasOne("TaskFlow.Models.User", "Owner")
-                        .WithMany("OwnedBoards")
-                        .HasForeignKey("OwnerId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Owner");
-                });
-
-            modelBuilder.Entity("TaskFlow.Models.BoardMember", b =>
+            modelBuilder.Entity("BoardMember", b =>
                 {
                     b.HasOne("TaskFlow.Models.Board", "Board")
                         .WithMany("BoardMembers")
@@ -212,6 +200,17 @@ namespace TaskFlow.Migrations
                     b.Navigation("Board");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("TaskFlow.Models.Board", b =>
+                {
+                    b.HasOne("TaskFlow.Models.User", "Owner")
+                        .WithMany("OwnedBoards")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
             modelBuilder.Entity("TaskFlow.Models.TaskColumn", b =>

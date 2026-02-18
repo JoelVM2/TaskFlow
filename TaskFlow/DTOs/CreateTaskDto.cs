@@ -13,6 +13,6 @@ namespace TaskFlow.DTOs
 
         public string Description { get; set; }
 
-        public int Position { get; set; }
+        public int? Position { get; set; }
     }
 }

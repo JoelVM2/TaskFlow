@@ -8,17 +8,17 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 🔹 DbContext
+// DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(
         builder.Configuration.GetConnectionString("DefaultConnection"),
         ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))
     ));
 
-// 🔹 Registrar servicios
+// Registrar servicios
 builder.Services.AddScoped<AuthService>();
 
-// 🔹 Configuración JWT
+// Configuración JWT
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
 
@@ -44,7 +44,7 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
-// 🔹 Controllers
+// Controllers
 builder.Services.AddControllers();
 
 // Swagger + soporte JWT
@@ -77,7 +77,7 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
-// 🔹 CORS
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular",

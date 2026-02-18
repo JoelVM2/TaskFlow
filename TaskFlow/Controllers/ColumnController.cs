@@ -116,7 +116,14 @@ namespace TaskFlow.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(column);
+            return Ok(new
+            {
+                column.Id,
+                column.Name,
+                column.Position,
+                column.BoardId
+            });
+
         }
 
         [HttpPut("{id}/move")]

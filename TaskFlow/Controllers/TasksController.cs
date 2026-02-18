@@ -57,7 +57,15 @@ namespace TaskFlow.Controllers
             _context.Tasks.Add(task);
             await _context.SaveChangesAsync();
 
-            return Ok(task);
+            return Ok(new
+            {
+                task.Id,
+                task.Title,
+                task.Description,
+                task.Position,
+                task.ColumnId
+            });
+
         }
 
 
@@ -159,8 +167,16 @@ namespace TaskFlow.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(task);
+            return Ok(new
+            {
+                task.Id,
+                task.Title,
+                task.Description,
+                task.Position,
+                task.ColumnId
+            });
         }
+
 
     }
 }
