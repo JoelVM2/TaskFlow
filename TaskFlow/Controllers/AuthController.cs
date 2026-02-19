@@ -23,7 +23,7 @@ namespace TaskFlow.Controllers
             if (!result)
                 return BadRequest("Email already exists");
 
-            return Ok("User registered successfully");
+            return Ok(new { message = "User registered successfully" });
         }
 
         [HttpPost("login")]

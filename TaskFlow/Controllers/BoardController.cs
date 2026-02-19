@@ -60,6 +60,7 @@ namespace TaskFlow.Controllers
                 {
                     b.Id,
                     b.Name,
+                    b.JoinCode,
                     Columns = b.Columns
                         .OrderBy(c => c.Position)
                         .Select(c => new
@@ -195,5 +196,31 @@ namespace TaskFlow.Controllers
             return new string(Enumerable.Repeat(chars, 6)
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateBoard(int id, UpdateBoardDto dto)
+        {
+            var role = await GetUserRole(id);
+
+            if (role != BoardRole.Owner)
+                return Forbid();
+
+            var board = await _context.Boards.FindAsync(id);
+
+            if (board == null)
+                return NotFound();
+
+            board.Name = dto.Name;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new
+            {
+                board.Id,
+                board.Name,
+                board.JoinCode
+            });
+        }
+
     }
 }
