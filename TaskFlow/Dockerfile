@@ -4,8 +4,10 @@ WORKDIR /src
 
 COPY . .
 
-RUN dotnet restore TaskFlow.csproj
-RUN dotnet publish TaskFlow.csproj -c Release -o /app/publish
+RUN find . -name "*.csproj"
+
+RUN dotnet restore TaskFlow/TaskFlow.csproj
+RUN dotnet publish TaskFlow/TaskFlow.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 
