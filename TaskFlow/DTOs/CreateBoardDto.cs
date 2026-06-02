@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Datos para crear un tablero.</summary>
     public class CreateBoardDto
     {
         [Required]

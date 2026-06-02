@@ -2,6 +2,7 @@
 
 namespace TaskFlow.Models
 {
+    /// <summary>Columna de un tablero. Tiene una posición y contiene tareas.</summary>
     public class TaskColumn
     {
         public int Id { get; set; }

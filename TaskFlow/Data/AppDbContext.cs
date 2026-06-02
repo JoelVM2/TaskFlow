@@ -3,6 +3,10 @@ using TaskFlow.Models;
 
 namespace TaskFlow.Data
 {
+    /// <summary>
+    /// Contexto de Entity Framework Core. Expone las tablas (DbSet) y configura
+    /// las relaciones, la clave compuesta de BoardMember y las reglas de borrado.
+    /// </summary>
     public class AppDbContext : DbContext
     {
         public AppDbContext(DbContextOptions<AppDbContext> options)
@@ -16,11 +20,12 @@ namespace TaskFlow.Data
         public DbSet<TaskColumn> Columns { get; set; }
         public DbSet<TaskItem> Tasks { get; set; }
 
+        /// <summary>Configura las relaciones entre entidades y sus reglas de borrado.</summary>
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            // Clave compuesta BoardMember
+            // Clave compuesta de BoardMember (UserId + BoardId)
             modelBuilder.Entity<BoardMember>()
                 .HasKey(bm => new { bm.UserId, bm.BoardId });
 
@@ -28,7 +33,7 @@ namespace TaskFlow.Data
             .Property(bm => bm.Role)
             .HasConversion<int>();
 
-            // 🔹 User - Owned Boards (1:N)
+            // Usuario - Tableros en propiedad (1:N)
             modelBuilder.Entity<Board>()
                 .HasOne(b => b.Owner)
                 .WithMany(u => u.OwnedBoards)

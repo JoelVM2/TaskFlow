@@ -10,6 +10,10 @@ using TaskFlow.Models;
 
 namespace TaskFlow.Services
 {
+    /// <summary>
+    /// Servicio de autenticación: registro (con tablero inicial), login,
+    /// hashing de contraseñas y generación del token JWT.
+    /// </summary>
     public class AuthService
     {
         private readonly AppDbContext _context;
@@ -22,6 +26,12 @@ namespace TaskFlow.Services
             _configuration = configuration;
         }
 
+        /// <summary>
+        /// Registra un usuario dentro de una transacción y le crea un tablero por defecto
+        /// ("{usuario}'s Board") con las columnas To Do / In Progress / Done, dejándolo como Owner.
+        /// </summary>
+        /// <param name="dto">Datos de registro (usuario, email, contraseña).</param>
+        /// <returns><c>true</c> si se registra; <c>false</c> si el email ya existe o falla la transacción.</returns>
         public async Task<bool> RegisterAsync(RegisterDto dto)
         {
             // Verificar si ya existe email
@@ -86,6 +96,8 @@ namespace TaskFlow.Services
             }
         }
 
+        /// <summary>Genera un código de unión aleatorio de 6 caracteres alfanuméricos.</summary>
+        /// <returns>El código de unión.</returns>
         private string GenerateJoinCode()
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -94,6 +106,9 @@ namespace TaskFlow.Services
                 .Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
+        /// <summary>Calcula el hash de una contraseña (SHA-256, en Base64).</summary>
+        /// <param name="password">Contraseña en texto plano.</param>
+        /// <returns>El hash en Base64.</returns>
         private string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
@@ -102,6 +117,9 @@ namespace TaskFlow.Services
             return Convert.ToBase64String(hash);
         }
 
+        /// <summary>Valida las credenciales y, si son correctas, genera un token JWT.</summary>
+        /// <param name="dto">Email y contraseña.</param>
+        /// <returns>El token JWT, o <c>null</c> si las credenciales no son válidas.</returns>
         public async Task<string?> LoginAsync(LoginDto dto)
         {
             var user = await _context.Users
@@ -118,6 +136,9 @@ namespace TaskFlow.Services
             return GenerateJwtToken(user);
         }
 
+        /// <summary>Genera un token JWT firmado con los claims del usuario (id, email, nombre).</summary>
+        /// <param name="user">Usuario para el que se genera el token.</param>
+        /// <returns>El token JWT serializado.</returns>
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _configuration.GetSection("JwtSettings");

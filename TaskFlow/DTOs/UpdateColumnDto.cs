@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Nuevo nombre de una columna.</summary>
     public class UpdateColumnDto
     {
         [Required]

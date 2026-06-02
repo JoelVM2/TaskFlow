@@ -2,6 +2,7 @@
 
 namespace TaskFlow.Models
 {
+    /// <summary>Tarea dentro de una columna.</summary>
     public class TaskItem
     {
         public int Id { get; set; }

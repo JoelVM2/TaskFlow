@@ -8,6 +8,10 @@ using System.Security.Claims;
 
 namespace TaskFlow.Controllers
 {
+    /// <summary>
+    /// Controlador de columnas: creación, edición, borrado y reordenación
+    /// dentro de un tablero. Requiere autenticación.
+    /// </summary>
     [ApiController]
     [Route("api/[controller]")]
     [Authorize]
@@ -20,11 +24,16 @@ namespace TaskFlow.Controllers
             _context = context;
         }
 
+        /// <summary>Obtiene el id del usuario autenticado a partir del token JWT.</summary>
+        /// <returns>Identificador del usuario.</returns>
         private int GetUserId()
         {
             return int.Parse(User.FindFirst(ClaimTypes.NameIdentifier)!.Value);
         }
 
+        /// <summary>Crea una columna al final del tablero. Solo el propietario (Owner) puede hacerlo.</summary>
+        /// <param name="dto">Id del tablero y nombre de la columna.</param>
+        /// <returns>200 con la columna creada; 403 si no es Owner del tablero.</returns>
         [HttpPost]
         public async Task<IActionResult> CreateColumn(CreateColumnDto dto)
         {
@@ -53,6 +62,11 @@ namespace TaskFlow.Controllers
         }
 
 
+        /// <summary>
+        /// Elimina una columna y recoloca las posiciones del resto. Solo el propietario puede hacerlo.
+        /// </summary>
+        /// <param name="id">Identificador de la columna.</param>
+        /// <returns>200 si se elimina; 404 si no existe; 403 si no es Owner del tablero.</returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteColumn(int id)
         {
@@ -85,6 +99,9 @@ namespace TaskFlow.Controllers
             return Ok();
         }
 
+        /// <summary>Devuelve el rol del usuario autenticado en un tablero (o null si no es miembro).</summary>
+        /// <param name="boardId">Identificador del tablero.</param>
+        /// <returns>El rol (Owner/Member) o null.</returns>
         private async Task<BoardRole?> GetUserRole(int boardId)
         {
             var userId = GetUserId();
@@ -95,6 +112,10 @@ namespace TaskFlow.Controllers
             return member?.Role;
         }
 
+        /// <summary>Renombra una columna. Solo el propietario (Owner) puede hacerlo.</summary>
+        /// <param name="id">Identificador de la columna.</param>
+        /// <param name="dto">Nuevo nombre.</param>
+        /// <returns>200 con la columna actualizada; 404 si no existe; 403 si no es Owner.</returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateColumn(int id, UpdateColumnDto dto)
         {
@@ -126,6 +147,12 @@ namespace TaskFlow.Controllers
 
         }
 
+        /// <summary>
+        /// Reordena una columna a una nueva posición, recolocando el resto. Solo el propietario puede hacerlo.
+        /// </summary>
+        /// <param name="id">Identificador de la columna.</param>
+        /// <param name="dto">Nueva posición (base 0).</param>
+        /// <returns>200 con la columna; 404 si no existe; 403 si no es Owner del tablero.</returns>
         [HttpPut("{id}/move")]
         public async Task<IActionResult> MoveColumn(int id, ReorderColumnDto dto)
         {
@@ -146,7 +173,7 @@ namespace TaskFlow.Controllers
             var newPosition = dto.NewPosition;
 
             if (oldPosition == newPosition)
-                return Ok(column);
+                return Ok(new { column.Id, column.Name, column.Position, column.BoardId });
 
             var columns = await _context.Columns
                 .Where(c => c.BoardId == column.BoardId)
@@ -173,7 +200,7 @@ namespace TaskFlow.Controllers
 
             await _context.SaveChangesAsync();
 
-            return Ok(column);
+            return Ok(new { column.Id, column.Name, column.Position, column.BoardId });
         }
 
 

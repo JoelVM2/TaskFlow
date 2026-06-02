@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Datos para registrar un nuevo usuario.</summary>
     public class RegisterDto
     {
         [Required]

@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Datos para crear una tarea.</summary>
     public class CreateTaskDto
     {
         [Required]

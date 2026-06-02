@@ -2,6 +2,7 @@
 
 namespace TaskFlow.Models
 {
+    /// <summary>Usuario registrado en la aplicación.</summary>
     public class User
     {
         public int Id { get; set; }

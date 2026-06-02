@@ -1,5 +1,6 @@
 ﻿using TaskFlow.Models;
 
+/// <summary>Relación entre un usuario y un tablero, con su rol. Clave compuesta (UserId + BoardId).</summary>
 public class BoardMember
 {
     public int UserId { get; set; }

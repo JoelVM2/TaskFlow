@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Credenciales para iniciar sesión.</summary>
     public class LoginDto
     {
         [Required]

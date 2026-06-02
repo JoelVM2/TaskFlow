@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Código para unirse a un tablero.</summary>
     public class JoinBoardDto
     {
         [Required]

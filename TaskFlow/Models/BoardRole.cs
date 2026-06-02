@@ -1,5 +1,6 @@
 ﻿namespace TaskFlow.Models
 {
+    /// <summary>Rol de un usuario dentro de un tablero.</summary>
     public enum BoardRole
     {
         Owner = 0,

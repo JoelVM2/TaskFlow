@@ -4,9 +4,9 @@
 
 El backend de **TaskFlow** está desarrollado con:
 
-* ASP.NET Core Web API (.NET 8/9)
+* ASP.NET Core Web API (.NET 8)
 * Entity Framework Core
-* MySQL (Proveedor Pomelo)
+* MySQL (proveedor Pomelo)
 * Autenticación JWT
 
 Se trata de una API tipo **Kanban (estilo Trello)** que permite:
@@ -118,11 +118,11 @@ Enum `BoardRole`:
 
 | Acción           | Owner | Admin | Member |
 | ---------------- | ----- | ----- | ------ |
-| Crear columna    | ✔     | ✔     | ✖      |
-| Eliminar columna | ✔     | ✔     | ✖      |
-| Crear tarea      | ✔     | ✔     | ✔      |
-| Mover tarea      | ✔     | ✔     | ✔      |
-| Eliminar tablero | ✔     | ✖     | ✖      |
+| Crear columna    | Sí    | Sí    | No     |
+| Eliminar columna | Sí    | Sí    | No     |
+| Crear tarea      | Sí    | Sí    | Sí     |
+| Mover tarea      | Sí    | Sí    | Sí     |
+| Eliminar tablero | Sí    | No    | No     |
 
 ---
 
@@ -138,6 +138,7 @@ Devuelve el tablero completo con:
 
 * Columnas ordenadas por posición
 * Tareas ordenadas por posición dentro de cada columna
+* Un indicador de si el usuario es el propietario (IsOwner)
 
 ### POST `/api/board`
 
@@ -149,7 +150,7 @@ Permite unirse a un tablero mediante JoinCode.
 
 ---
 
-# 📂 Columnas
+# Columnas
 
 ## Modelo TaskColumn
 
@@ -176,7 +177,7 @@ Permite modificar el nombre.
 
 ### PUT `/api/column/{id}/move`
 
-Permite cambiar el orden de la columna (drag horizontal).
+Permite cambiar el orden de la columna.
 
 Se reajustan automáticamente las posiciones.
 
@@ -244,21 +245,22 @@ Elimina una tarea.
 
 ## Relaciones
 
-* Usuario → Tableros (Owner)
-* Usuario ↔ Tableros (BoardMembers)
-* Tablero → Columnas
-* Columna → Tareas
-* Tarea → Usuario asignado (opcional)
+* Usuario -> Tableros (Owner)
+* Usuario <-> Tableros (BoardMembers)
+* Tablero -> Columnas
+* Columna -> Tareas
+* Tarea -> Usuario asignado (opcional)
 
 Se utilizan claves foráneas con reglas de borrado en cascada.
 
 ---
 
-# 🗄 Conexión a la Base de Datos
+# Conexión a la Base de Datos
 
-La aplicación utiliza **MySQL** como sistema gestor de base de datos y se conecta mediante **Entity Framework Core** con el proveedor Pomelo.
+La aplicación utiliza **MySQL** como sistema gestor de base de datos y se conecta
+mediante **Entity Framework Core** con el proveedor Pomelo.
 
-## 1️⃣ Cadena de conexión
+## 1. Cadena de conexión
 
 En el archivo `appsettings.json` se define la cadena de conexión:
 
@@ -278,7 +280,7 @@ Parámetros principales:
 
 ---
 
-## 2️⃣ Configuración en Program.cs
+## 2. Configuración en Program.cs
 
 En `Program.cs` se registra el DbContext:
 
@@ -298,7 +300,7 @@ Esto permite que Entity Framework:
 
 ---
 
-## 3️⃣ DbContext
+## 3. DbContext
 
 El archivo `AppDbContext.cs` define:
 
@@ -319,7 +321,7 @@ public DbSet<TaskItem> Tasks { get; set; }
 
 ---
 
-## 4️⃣ Migraciones
+## 4. Migraciones
 
 Para crear o actualizar la base de datos se utilizan migraciones.
 
@@ -339,7 +341,7 @@ Esto genera automáticamente las tablas según los modelos definidos.
 
 ---
 
-## 5️⃣ Flujo de conexión
+## 5. Flujo de conexión
 
 1. La API arranca.
 2. Se registra el DbContext con la cadena de conexión.
@@ -358,7 +360,7 @@ En `appsettings.json`:
   "Key": "CLAVE_SECRETA",
   "Issuer": "TaskFlowAPI",
   "Audience": "TaskFlowClient",
-  "ExpiresInMinutes": 60
+  "ExpiresInMinutes": 720
 }
 ```
 
@@ -373,8 +375,8 @@ El token incluye los siguientes claims:
 # Seguridad
 
 * Todos los endpoints de negocio requieren autenticación.
-* Se valida pertenencia al tablero en cada operación.
-* Se aplican permisos según rol.
+* Se valida la pertenencia al tablero en cada operación.
+* Se aplican permisos según el rol.
 * El sistema de posiciones mantiene la integridad del Kanban.
 
 ---
@@ -382,5 +384,3 @@ El token incluye los siguientes claims:
 # Proyecto
 
 Desarrollado como Proyecto Final de DAW.
-
----

@@ -2,6 +2,7 @@
 
 namespace TaskFlow.Models
 {
+    /// <summary>Tablero Kanban: pertenece a un Owner y tiene miembros, columnas y un código de unión.</summary>
     public class Board
     {
         public int Id { get; set; }

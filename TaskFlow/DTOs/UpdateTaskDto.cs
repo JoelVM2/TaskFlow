@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Nuevos título y descripción de una tarea.</summary>
     public class UpdateTaskDto
     {
         [Required]

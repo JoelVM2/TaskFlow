@@ -2,6 +2,7 @@
 
 namespace TaskFlow.DTOs
 {
+    /// <summary>Datos para crear una columna.</summary>
     public class CreateColumnDto
     {
         [Required]

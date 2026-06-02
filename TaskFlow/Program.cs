@@ -87,11 +87,6 @@ builder.Services.AddCors(options =>
               .AllowAnyHeader()
               .AllowAnyMethod();
         });
-   // policy.WithOrigins(
-    //"https://taskflow.vercel.app"
-//)
-//.AllowAnyHeader()
-//.AllowAnyMethod();
 
 });
 
